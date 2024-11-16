@@ -16,6 +16,7 @@ public class Post {
         this.title = title;
         this.author = author;
         this.content = content;
+        this.date = LocalDateTime.now();
     }
 
     public int getPostId() {

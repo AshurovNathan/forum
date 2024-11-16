@@ -13,26 +13,13 @@ public class ForumImpl implements Forum {
     private int size;
     private final Comparator<Post> comparator = (p1, p2) -> {
         int res = p1.getAuthor().compareTo(p2.getAuthor());
-        if (res != 0) {
-            return res;
-        }
 
-        if (p1.getDate() == null && p2.getDate() == null) {
-            return 0;
-        }
-        if (p1.getDate() == null) {
-            return -1;
-        }
-        if (p2.getDate() == null) {
-            return 1;
-        }
 
-        return p1.getDate().compareTo(p2.getDate());
+        return res != 0 ? res : p1.getDate().compareTo(p2.getDate());
     };
 
     public ForumImpl() {
         posts = new Post[6];
-        size = 0;
     }
 
     @Override
@@ -89,11 +76,17 @@ public class ForumImpl implements Forum {
 
     @Override
     public Post[] getPostsByAuthor(String author) {
-        return findPostByPredicate(e -> e.getAuthor().equals(author));
+    LocalDate dateFrom = LocalDate.MIN;
+    LocalDate dateTo = LocalDate.MAX;
+    return getPostsByAuthorByIsai(author,dateFrom,dateTo);
     }
 
     @Override
     public Post[] getPostsByAuthor(String author, LocalDate dateFrom, LocalDate dateTo) {
+        return getPostsByAuthorByIsai(author,dateFrom,dateTo);
+    }
+
+    private Post[] getPostsByAuthorByIsai(String author, LocalDate dateFrom, LocalDate dateTo) {
         Post pattern = new Post(Integer.MIN_VALUE, "", author, "");
         pattern.setDate(dateFrom.atStartOfDay());
         int from = Arrays.binarySearch(posts, 0, size, pattern, comparator);
@@ -104,19 +97,6 @@ public class ForumImpl implements Forum {
         to = to >= 0 ? to : -to - 1;
 
         return Arrays.copyOfRange(posts, from, to);
-    }
-
-
-    public  Post[] findPostByPredicate(Predicate<Post> predicate){
-        Post[] res = new Post[size];
-        int count = 0;
-
-        for (int i = 0; i < size; i++) {
-            if(predicate.test(posts[i])){
-                res[count++] = posts[i];
-            }
-        }
-        return Arrays.copyOf(res,count);
     }
 
     @Override
